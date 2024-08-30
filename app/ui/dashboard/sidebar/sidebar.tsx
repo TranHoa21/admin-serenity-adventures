@@ -19,7 +19,8 @@ import { logout } from '../../../store/actions/authActions';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store/store';
 import axios from 'axios';
-import { getAuthCookie, removeAuthCookie } from "../../../../utils/cookies"
+import { getAuthCookie, removeAuthCookie } from "../../../../utils/cookies";
+require('dotenv').config();
 const menuItem = [
 
     {
@@ -101,10 +102,11 @@ export default function SideBar() {
         removeAuthCookie();
         router.push('/login');
     };
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get<User[]>(`https://serenity-adventures-demo.onrender.com/api/v1/user/${user.id}`);
+                const response = await axios.get<User[]>(`${apiUrl}/user/${user.id}`);
                 const userData = response.data[0]
                 setStoredUser(userData);
 

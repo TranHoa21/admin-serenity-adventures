@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import React from "react";
 import Image from "next/image";
-import avatar from "../../../public/img/user_1177568.png"
+require('dotenv').config();
 import "../../style/user/style.scss"
 type Props = {};
 type Payment = {
@@ -24,11 +24,12 @@ type Payment = {
 
 function UsersPage({ }: Props) {
   const [data, setData] = useState<Payment[]>([]);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://serenity-adventures-demo.onrender.com/api/v1/user');
+        const response = await axios.get(`${apiUrl}/user`);
         const data = response.data;
         console.log("check data", data)
         setData(data);

@@ -1,48 +1,36 @@
 "use client"
 
-import React, { useState, useRef, ChangeEvent, FormEvent, } from 'react';
-import ReactQuill from 'react-quill';
+import React, { useState, ChangeEvent, FormEvent, } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import "../../../style/blog/create.scss";
-import 'react-quill/dist/quill.snow.css';
-
+import SunEditor from 'suneditor-react';
+import 'suneditor/dist/css/suneditor.min.css';
+require('dotenv').config();
 const ClientComponent = () => {
-    const reactQuillRef = useRef<ReactQuill>(null);
     const [value, setValue] = useState('');
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [description, setDescription] = useState('');
     const [image, setImage] = useState<File | null>(null);
-    const [reviewImageUrl, setPreviewImageUrl] = useState(''); // Thay đổi kiểu dữ liệu của state image
-
+    const [reviewImageUrl, setPreviewImageUrl] = useState('');
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const router = useRouter();
-
-
-
-
-    const onChange = (newValue: string, delta: any, source: any, editor: any) => {
-        if (source === 'user') {
-            setValue(newValue); // Update editorValue
-            const text = editor?.getText() || '';
-            setContent(text); // Update description
-        }
-    };
 
     const handleTitleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setTitle(e.target.value);
     };
+
     const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setDescription(e.target.value);
     };
-
 
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files && e.target.files[0];
         if (file) {
             setImage(file);
-            const imageUrl = URL.createObjectURL(file); // Tạo đường dẫn URL từ file
-            setPreviewImageUrl(imageUrl); // Lưu đường dẫn URL vào state
+            const imageUrl = URL.createObjectURL(file);
+            setPreviewImageUrl(imageUrl);
         }
     };
 
@@ -55,12 +43,12 @@ const ClientComponent = () => {
             formData.append('content', value);
             formData.append('description', description);
             if (image) {
-                formData.append('file', image); // Sửa 'image' thành 'file'
+                formData.append('file', image);
             }
 
-            const response = await axios.post('http://localhost:3001/api/v1/post', formData, {
+            const response = await axios.post(`${apiUrl}/post`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data' // Đảm bảo cài đặt 'Content-Type' là 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data'
                 }
             });
             console.log('check:', title, content, value, image);
@@ -70,14 +58,15 @@ const ClientComponent = () => {
         }
     };
 
-
-
+    const handleChange = (content: string) => {
+        setValue(content);
+        setContent(content);
+    };
 
     return (
-
         <div className="create">
-            <h1>Create New Tour  </h1>
-            <span className="in-title" >Title:
+            <h1>Create New Tour</h1>
+            <span className="in-title">Title:
                 <textarea
                     value={title}
                     onChange={handleTitleChange}
@@ -102,62 +91,29 @@ const ClientComponent = () => {
                         placeholder=""
                         required />
                 </span>
-
-
             </div>
-
-
             <div className="content">
-                <ReactQuill
-                    ref={reactQuillRef}
-                    theme="snow"
-                    placeholder="Start writing..."
-                    modules={{
-                        toolbar: {
-                            container: [
-                                [{ header: "1" }, { header: "2" }, { font: [] }],
-                                [{ size: [] }],
-                                ["bold", "italic", "underline", "strike", "blockquote"],
-                                [
-                                    { list: "ordered" },
-                                    { list: "bullet" },
-                                    { indent: "-1" },
-                                    { indent: "+1" },
-                                ],
-                                ["link", "image", "video"],
-                                ["code-block"],
-                                ["clean"],
-                            ],
-                        },
-                        clipboard: {
-                            matchVisual: false,
-                        },
+                <SunEditor
+                    defaultValue={value}
+                    onChange={handleChange}
+                    setOptions={{
+                        height: 'auto',
+                        buttonList: [
+                            ['undo', 'redo'],
+                            ['font', 'fontSize', 'formatBlock'],
+                            ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript'],
+                            ['fontColor', 'hiliteColor'],
+                            ['removeFormat'],
+                            '/', // Line break
+                            ['outdent', 'indent'],
+                            ['align', 'horizontalRule', 'list', 'lineHeight'],
+                            ['table', 'link', 'image', 'video']
+                        ]
                     }}
-                    formats={[
-                        "header",
-                        "font",
-                        "size",
-                        "bold",
-                        "italic",
-                        "underline",
-                        "strike",
-                        "blockquote",
-                        "list",
-                        "bullet",
-                        "indent",
-                        "link",
-                        "image",
-                        "video",
-                        "code-block",
-                    ]}
-                    value={value}
-                    onChange={onChange}
                 />
             </div>
-            <button className="btn" type="submit" onClick={handleSubmit}  >Save</button>
-
+            <button className="btn" type="submit" onClick={handleSubmit}>Save</button>
         </div>
-
     );
 };
 

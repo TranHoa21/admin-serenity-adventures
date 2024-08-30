@@ -5,6 +5,7 @@ import Image from "next/image";
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import moment from 'moment';
+require('dotenv').config();
 type Payment = {
     id: number;
     name: string;
@@ -16,10 +17,11 @@ type Payment = {
 };
 export default function Transactions() {
     const [data, setData] = useState<Payment[]>([]);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('https://serenity-adventures-demo.onrender.com/api/v1/booking');
+                const response = await axios.get(`${apiUrl}/booking`);
                 const sortedData = response.data.sort((a: Payment, b: Payment) => {
                     // Sort tours based on their id in descending order (newest first)
                     return b.id - a.id;

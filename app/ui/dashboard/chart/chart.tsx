@@ -3,6 +3,7 @@ import "../../../style/dashboard/chart.scss";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+require('dotenv').config();
 const data = [
     {
         name: '1/2024',
@@ -63,11 +64,11 @@ export default function Chart() {
     const [filteredData, setFilteredData] = useState<ChartData[]>([]);
     const [data, setData] = useState<ChartData[]>([]);
     const [filterDuration, setFilterDuration] = useState('6m');
-
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await axios.get<Booking[]>(`https://serenity-adventures-demo.onrender.com/api/v1/booking`);
+                const response = await axios.get<Booking[]>(`${apiUrl}/booking`);
                 const formattedData: ChartData[] = response.data.map((item) => {
                     const createDate = new Date(item.createdAt);
                     const monthYear = createDate.toLocaleString('en-US', { month: 'short', year: 'numeric' });

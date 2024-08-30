@@ -1,39 +1,29 @@
 "use client"
 
-import React, { useState, useRef, ChangeEvent, FormEvent, } from 'react';
-import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
-import ReactQuill from 'react-quill';
+import React, { useState, ChangeEvent, FormEvent, } from 'react';
+import SunEditor from 'suneditor-react';
+import 'suneditor/dist/css/suneditor.min.css';
 import { PlaceSelect } from "./places"
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import "../../../style/tour/create.scss";
-
+require('dotenv').config();
 const ClientComponent = () => {
-    const [value, setValue] = useState('');
-    const reactQuillRef = useRef<ReactQuill>(null);
+    const [content, setContent] = useState('');
+    const [itinerary, setItinerary] = useState('');
     const [title, setTitle] = useState('');
-    const [places_name, setPlaces_name] = useState('');
-    const [description, setDescription] = useState('');
-    const [image, setImage] = useState<File | null>(null); // Thay đổi kiểu dữ liệu của state image
+    const [placesName, setPlacesName] = useState('');
+    const [image, setImage] = useState<File | null>(null);
+    const [image_in_day, setImage_in_day] = useState<File | null>(null);
     const router = useRouter();
     const [price, setPrice] = useState<number>(0);
-
-
-    const onChange = (newValue: string, delta: any, source: any, editor: any) => {
-        if (source === 'user') {
-            setValue(newValue);
-            const text = editor?.getText() || '';
-            setDescription(text);
-        }
-    };
-
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const handleTitleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setTitle(e.target.value);
     };
 
     const handlePlacesChange = (value: string) => {
-        setPlaces_name(value);
+        setPlacesName(value);
     };
 
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -43,6 +33,11 @@ const ClientComponent = () => {
         }
     };
 
+    const handlePriceChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+        const value = parseFloat(e.target.value);
+        setPrice(value);
+    };
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
@@ -50,33 +45,31 @@ const ClientComponent = () => {
             const formData = new FormData();
             formData.append('title', title);
             formData.append('price', price.toString());
-            formData.append('places_name', places_name);
-            formData.append('description', value);
+            formData.append('places_name', placesName);
+            formData.append('description', content);
+            formData.append('itinerary', itinerary);
             if (image) {
-                formData.append('file', image); // Sửa 'image' thành 'file'
+                formData.append('file', image);
+            }
+            if (image_in_day) {
+                formData.append('file_in_day', image_in_day);
             }
 
-            const response = await axios.post('http://localhost:3001/api/v1/tour', formData, {
+            const response = await axios.post(`${apiUrl}/tour`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data' // Đảm bảo cài đặt 'Content-Type' là 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data'
                 }
             });
-            console.log('check:', title, places_name, value, image);
-            router.push('/tours');
+            console.log('check:', title, placesName, content, image);
+            router.push('/dashboard/tours');
         } catch (error) {
             console.error('Lỗi:', error);
         }
     };
-    const handlePriceChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-        const value = parseFloat(e.target.value); // Chuyển đổi giá trị từ string sang number
-        setPrice(value);
-    };
-
 
     return (
-
         <div>
-            <h1>Create New Tour  </h1>
+            <h1>Create New Tour</h1>
             <span className="in-title"> Title:
                 <textarea
                     className="inputText"
@@ -84,73 +77,62 @@ const ClientComponent = () => {
                     onChange={handleTitleChange}
                     autoComplete="title"
                     placeholder=""
-                    required />
+                    required
+                />
             </span>
 
-            <PlaceSelect onChange={handlePlacesChange} value={places_name} />
+            <PlaceSelect onChange={handlePlacesChange} value={placesName} />
             <img src={image ? URL.createObjectURL(image) : ""} className="img-tour" />
 
             <input className="image-file" type="file" name="image" onChange={handleImageChange} />
 
             <div className="description">
-                <ReactQuill
-                    ref={reactQuillRef}
-                    theme="snow"
-                    placeholder="Start writing..."
-                    modules={{
-                        toolbar: {
-                            container: [
-                                [{ header: "1" }, { header: "2" }, { font: [] }],
-                                [{ size: [] }],
-                                ["bold", "italic", "underline", "strike", "blockquote"],
-                                [
-                                    { list: "ordered" },
-                                    { list: "bullet" },
-                                    { indent: "-1" },
-                                    { indent: "+1" },
-                                ],
-                                ["link", "image", "video"],
-                                ["code-block"],
-                                ["clean"],
-                            ],
-                        },
-                        clipboard: {
-                            matchVisual: false,
-                        },
+                <h3> Description:</h3>
+                <SunEditor
+                    setOptions={{
+                        buttonList: [
+                            ['formatBlock', 'bold', 'italic', 'underline', 'strike'],
+                            ['blockquote', 'list', 'indent', 'align'],
+                            ['fontColor', 'hiliteColor', 'textStyle'],
+                            ['link', 'image', 'video'],
+                            ['removeFormat']
+                        ]
                     }}
-                    formats={[
-                        "header",
-                        "font",
-                        "size",
-                        "bold",
-                        "italic",
-                        "underline",
-                        "strike",
-                        "blockquote",
-                        "list",
-                        "bullet",
-                        "indent",
-                        "link",
-                        "image",
-                        "video",
-                        "code-block",
-                    ]}
-                    value={value}
-                    onChange={onChange}
+                    onChange={(content) => setContent(content)}
+                    setContents={content}
+                    placeholder="Start writing..."
                 />
             </div>
-            <button className="btn" type="submit" onClick={handleSubmit}  >Save</button>
+            <div className="itinerary">
+                <h3> Itinerary:</h3>
+                <SunEditor
+                    setOptions={{
+                        buttonList: [
+                            ['formatBlock', 'bold', 'italic', 'underline', 'strike'],
+                            ['blockquote', 'list', 'indent', 'align'],
+                            ['fontColor', 'hiliteColor', 'textStyle'],
+                            ['link', 'image', 'video'],
+                            ['removeFormat']
+                        ]
+                    }}
+                    onChange={(content) => setItinerary(content)}
+                    setContents={itinerary}
+                    placeholder="Start writing..."
+                />
+            </div>
             <span className='in-title'>Price:
-                <textarea className='price'
+                <textarea
+                    className='price'
                     onChange={handlePriceChange}
-                    value={price}
+                    value={price.toString()}
                     autoComplete="price"
                     placeholder=""
-                    required />
+                    required
+                />
             </span>
+            <button className="btn" type="submit" onClick={handleSubmit}>Save</button>
 
         </div>
-
     );
 };
 

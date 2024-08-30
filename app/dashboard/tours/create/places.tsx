@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import axios from "axios";
-import "../../../style/tour/place.scss"
+import "../../../style/tour/place.scss";
+require('dotenv').config();
 interface Place {
     id: number;
     name: string;
@@ -21,11 +22,11 @@ interface PlaceSelectProps {
 export const PlaceSelect: React.FC<PlaceSelectProps> = ({ value, onChange }) => {
     const [places, setPlaces] = useState<Place[]>([]);
     const [selectedPlace, setSelectedPlace] = useState<Option | null>(null);
-
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     useEffect(() => {
         const fetchPlaces = async () => {
             try {
-                const response = await axios.get<Place[]>("https://serenity-adventures-demo.onrender.com/api/v1/place");
+                const response = await axios.get<Place[]>(`${apiUrl}/place`);
                 setPlaces(response.data);
             } catch (error) {
                 console.error("Error fetching places:", error);

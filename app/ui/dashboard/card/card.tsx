@@ -17,7 +17,7 @@ export default function Card() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('https://serenity-adventures-demo.onrender.com/api/v1/user');
+                const response = await axios.get('user');
                 const data = response.data as User[];
 
                 // Lấy tháng hiện tại và tháng trước

@@ -7,7 +7,7 @@ import "../../app/style/components/message.scss"
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { getAuthCookie } from "../../utils/cookies"
-
+require('dotenv').config();
 interface Message {
     senderId: string;
     createdAt: Date;
@@ -30,13 +30,13 @@ const Message: React.FC<{ message: Message }> = ({ message }) => {
     const bubbleBgColor = fromMe ? "bg-blue-500" : "";
     const shakeClass = message.shouldShake ? "" : "";
     const profilePic = fromMe ? storedUser?.avatar : "";
-
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
     useEffect(() => {
         if (userId) {
             const fetchUser = async () => {
                 try {
-                    const response = await axios.get(`https://serenity-adventures-demo.onrender.com/api/v1/user/${message.senderId}`);
+                    const response = await axios.get(`${apiUrl}/user/${message.senderId}`);
                     const userData = response.data;
 
                     setStoredUser(userData);

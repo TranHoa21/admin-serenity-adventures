@@ -10,6 +10,7 @@ import { PlaceSelect } from "../../create/places"
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import "../../../../style/tour/update.scss";
+require('dotenv').config();
 interface Tour {
     id: number;
     title: string;
@@ -32,7 +33,7 @@ const ClientComponent = () => {
     const [tour, setTour] = useState<Tour | null>(null);
     const { link } = useParams();
     const [editorValue, setEditorValue] = useState('');
-
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     useEffect(() => {
         if (tour) {
             setTitle(tour.title);
@@ -79,7 +80,7 @@ const ClientComponent = () => {
                 formData.append('file', image); // Sửa 'image' thành 'file'
             }
 
-            const response = await axios.put(`https://serenity-adventures-demo.onrender.com/api/v1/tour/${link}`, formData, {
+            const response = await axios.put(`${apiUrl}/tour/${link}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -90,10 +91,9 @@ const ClientComponent = () => {
             console.error('Lỗi:', error);
         }
     };
-
     useEffect(() => {
         if (link) {
-            axios.get<Tour>(`https://serenity-adventures-demo.onrender.com/api/v1/tour/${link}`)
+            axios.get<Tour>(`${apiUrl}/tour/${link}`)
                 .then(response => {
 
                     setTour(response.data);

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from "next/link";
 import React from "react";
 import { useRouter, useSearchParams } from 'next/navigation';
-
+require('dotenv').config();
 type Props = {};
 
 type Payment = {
@@ -21,11 +21,11 @@ export default function Tour({ }: Props) {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage] = useState<number>(5);
     const router = useRouter();
-
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('https://serenity-adventures-demo.onrender.com/api/v1/tour');
+                const response = await axios.get(`${apiUrl}/tour`);
                 const sortedData = response.data.sort((a: Payment, b: Payment) => {
                     // Sort tours based on their id in descending order (newest first)
                     return b.id - a.id;
@@ -52,7 +52,7 @@ export default function Tour({ }: Props) {
 
     const handleDelete = (tour: Payment) => {
         axios
-            .delete(`https://serenity-adventures-demo.onrender.com/api/v1/tour/${tour.id}`)
+            .delete(`${apiUrl}/tour/${tour.id}`)
             .then((response) => {
                 console.log('Tour deleted successfully');
 

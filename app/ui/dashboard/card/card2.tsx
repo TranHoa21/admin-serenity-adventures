@@ -4,7 +4,7 @@ import "../../../style/dashboard/card.scss";
 import { MdSupervisedUserCircle } from "react-icons/md";
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-
+require('dotenv').config();
 interface Booking {
     createdAt: string;
     total_amount: string;
@@ -14,11 +14,11 @@ export default function CardTotalRevenue() {
     const [totalRevenue, setTotalRevenue] = useState(0);
     const [percentIncrease, setPercentIncrease] = useState(0);
     const [isPositive, setIsPositive] = useState(true);
-
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('https://serenity-adventures-demo.onrender.com/api/v1/booking');
+                const response = await axios.get(`${apiUrl}/booking`);
                 const data = response.data as Booking[];
 
                 // Lấy tháng hiện tại và tháng trước

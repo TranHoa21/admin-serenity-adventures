@@ -3,8 +3,7 @@
 import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../store/actions/authActions';
-import { setUser } from '../store/actions/userActions';
+require('dotenv').config();
 import "../style/login/login.scss"
 import axiosInstance from '../api/axiosInstance'
 import Cookies from 'js-cookie';
@@ -23,12 +22,12 @@ const Login = () => {
     const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
         setPassword(e.target.value);
     };
-
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         try {
-            const res = await axiosInstance.post('https://serenity-adventures-demo.onrender.com/api/v1/auth/login', {
+            const res = await axiosInstance.post(`${apiUrl}/auth/login`, {
                 email,
                 password,
             }, {
